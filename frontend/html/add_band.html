@@ -1,0 +1,31 @@
+<html>
+<head>
+    <script defer src="https://unpkg.com/alpinejs@3.5.0/dist/cdn.min.js"></script>
+</head>
+<body>
+    <div x-data="{
+        responsedata: null,
+        bandName: null,
+        async addBand() {
+            this.responsedata = await (await fetch('http://localhost:8000/api/band/', 
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    Name: this.bandName
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            })).json();
+
+            console.log(this.responsedata);
+        },
+    }">
+        <input type="text" x-model="bandName" placeholder="Enter band name">
+        <button x-on:click="addBand">Add Band</button>
+
+        <p>Band inserted with id: <strong x-text="responsedata.BandID"></strong></p>
+        <p>Band Name: <strong x-text="responsedata.Name"></strong></p>
+    </div>
+</body>
+</html>

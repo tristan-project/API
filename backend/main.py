@@ -1,31 +1,46 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
+import backend.crud as crud
+import backend.models as models
+import backend.schemas   as schemas
+import backend.database as database
 import os
-import crud
-import models
-import schemas
-from database import SessionLocal, engine
 
-print("We are in the main.......")
+from fastapi.middleware.cors import CORSMiddleware
+
+
 if not os.path.exists('.\sqlitedb'):
-    print("Making folder.......")
     os.makedirs('.\sqlitedb')
 
-print("Creating tables.......")
-models.Base.metadata.create_all(bind=engine)
-print("Tables created.......")
+#"sqlite:///./sqlitedb/sqlitedata.db"
+models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+    "https://localhost.tiangolo.com",
+    "http://127.0.0.1:5500"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Dependency
 def get_db():
-    db = SessionLocal()
+    db = database.SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
 
 
 @app.post("/users/", response_model=schemas.User)
@@ -61,3 +76,14 @@ def create_item_for_user(
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
+
+
+@app.post("/api/band/", response_model=schemas.Band)
+def create_band_endpoint(band: schemas.BandCreate, db: Session = Depends(get_db)):
+    band_id = crud.create_band(db, band)
+    return {"BandID": band_id, **band.dict()}
+
+@app.post("/api/festival/", response_model=schemas.Festival)
+def create_festival_endpoint(festival: schemas.FestivalCreate, db: Session = Depends(get_db)):
+    festival_id = crud.create_festival(db, festival)
+    return {"FestivalID": festival_id, **festival.dict()}
