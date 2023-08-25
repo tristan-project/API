@@ -124,7 +124,30 @@ def create_band_endpoint(band: schemas.BandCreate, db: Session = Depends(get_db)
     band_id = crud.create_band(db, band)
     return {"id": band_id, "name": band.name}
 
-@app.post("/festivals/", response_model=schemas.Festival, status_code=status.HTTP_201_CREATED)
-def create_festival_endpoint(festival: schemas.FestivalCreate, db: Session = Depends(get_db)):
-    festival_id = crud.create_festival(db, festival)
-    return {"FestivalID": festival_id, **festival.dict()}
+
+
+
+@app.get("/festivals", response_model=list[schemas.Festival])
+def read_festivals(db: Session = Depends(get_db)):
+    festivals = crud.get_festivals(db)
+    return festivals
+
+
+@app.post("/festivals", response_model=schemas.Festival, status_code=status.HTTP_201_CREATED)
+def create_festivals_endpoint(festival: schemas.FestivalCreate, db: Session = Depends(get_db)):
+    festivals = crud.create_festivals(db, festival)
+    return {"id": festivals, "name": festival.name}
+
+
+
+
+@app.get("/poduims", response_model=list[schemas.Podium])
+def read_poduims(db: Session = Depends(get_db)):
+    poduims = crud.get_festivals(db)
+    return poduims
+
+
+@app.post("/poduims", response_model=schemas.Podium, status_code=status.HTTP_201_CREATED)
+def create_poduims_endpoint(poduim: schemas.PodiumCreate, db: Session = Depends(get_db)):
+    poduims = crud.create_poduims(db, poduim)
+    return {"id": poduims, "name": poduim.name}

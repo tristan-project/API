@@ -9,22 +9,22 @@
 </head>
 <body>
 
-<h1>Add a festival</h1>
+<h1>Add a poduim</h1>
 
-<div x-data="bandData()">
-    <label for="name">festival Name:</label><br>
-    <input x-model="festival.name" type="text" id="name" required><br><br>
-    <button @click="createBand">Add Band</button>
+<div x-data="poduimData()">
+    <label for="name">poduim Name:</label><br>
+    <input x-model="poduim.name" type="text" id="name" required><br><br>
+    <button @click="createPoduim">Add poduim</button>
 </div>
 
 <script>
-function bandData() {
+function poduimData() {
     return {
         band: {
             name: ''
         },
-        createBand() {
-            fetch('/festivals', {
+        createPoduim() {
+            fetch('/poduims', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ function bandData() {
             .then(response => response.json())
             .then(data => {
                 alert('Band created successfully with ID: ' + data.id);
-                location.href = '/static/festival/festivals.html'; // Redirect to the main page
+                location.href = '/static/poduim/poduim.html'; // Redirect to the main page
 
             })
             .catch(error => {

@@ -9,34 +9,32 @@
 </head>
 <body>
 
-    <h1>festivals</h1>
-    <div x-data="festivalData()" x-init="fetchFestivals">
-        <template x-for="festival in festivals" :key="festival.id">
+    <h1>poduims</h1>
+    <div x-data="poduimData()" x-init="fetchpoduims">
+        <template x-for="poduim in poduims" :key="poduim.id">
             <div>
-            <h2 x-text="festival.name"></h2>
+            <h2 x-text="poduim.name"></h2>
                  <ul>
-                    <li x-text="'ID: ' + festival.id"></li>
+                    <li x-text="'ID: ' + poduim.id"></li>
                 </ul>
           
             </div>
         </template>
     </div>
 
-    <h1>add new festival</h1>
-    <a href="/static/band/create_band.html"><button>add new festival</button></a>
-
-
+    <h1>add new poduims</h1>
+    <a href="/static/poduim/create_poduim.html"><button>add new poduim</button></a>
     <!-- Navigation links or other components can be added here, similar to the User page -->
 
     <script>
-    function festivalData() {
+    function poduimsData() {
         return {
             bands: [],
-            fetchFestivals() {
+            fetchPoduims() {
                 fetch('/bands')
                     .then(response => response.json())
                     .then(data => {
-                        this.festivals = data;
+                        this.poduims = data;
                     });
             }
         };

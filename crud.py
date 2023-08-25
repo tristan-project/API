@@ -88,68 +88,36 @@ def create_band(db: Session, band: schemas.BandCreate):
     return db_band.id
 
 
-# def get_band_by_name(db: Session, name: str):
-#     """Fetch a band by its name."""
-#     return db.query(models.Band).filter(models.Band.name == name).first()
 
-# def create_band(db: Session, band: schemas.BandCreate) -> str:
-#     """Create a new band if it doesn't exist and return its id."""
-#     existing_band = get_band_by_name(db, band.name)  # Note: changed `band.Name` to `band.name`
-    
-#     if existing_band:
-#         # Band already exists, return its ID
-#         return existing_band.id
-#     else:
-#         db_band = models.Band(**band.dict())
-#         db.add(db_band)
-#         db.commit()
-#         db.refresh(db_band)
-#         return db_band.id  # return the id of the newly created band
 
-#  creatie festival   
- 
-def get_festival_by_name(db: Session, name: str):
-    """Fetch a festival by its name."""
-    return db.query(models.Festival).filter(models.Festival.Name == name).first()
-    
-def create_festival(db: Session, festival: schemas.FestivalCreate) -> int:
-    """Create a new festival if it doesn't exist and return its FestivalID."""
-    existing_festival = get_festival_by_name(db, festival.Name)  # zorg dat je deze functie ook hebt
-    if existing_festival:
-        # Festival already exists, return its ID
-        return existing_festival.FestivalID
-    else:
-        db_festival = models.Festival(**festival.dict())
-        db.add(db_festival)
-        try:
-            db.commit()
-            db.refresh(db_festival)
-            return db_festival.FestivalID  # return the FestivalID of the newly created festival
-        except IntegrityError:
-            db.rollback()
-            raise ValueError(f"Festival with name {festival.Name} already exists!")  
 
-#  creatie podium
-def get_podium_by_name(db: Session, name: str):
-    """Fetch a podium by its name."""
-    return db.query(models.Podium).filter(models.Podium.Name == name).first()
+def get_festivals(db: Session):
+    return db.query(models.Festival).all()
 
-def create_podium(db: Session, podium: schemas.PodiumCreate) -> int:
-    """Create a new podium if it doesn't exist and return its PodiumID."""
-    existing_podium = get_podium_by_name(db, podium.Name)
-    if existing_podium:
-        # Podium already exists, return its ID
-        return existing_podium.PodiumID
-    else:
-        db_podium = models.Podium(**podium.dict())
-        db.add(db_podium)
-        try:
-            db.commit()
-            db.refresh(db_podium)
-            return db_podium.PodiumID  # return the PodiumID of the newly created podium
-        except IntegrityError:
-            db.rollback()
-            raise ValueError(f"Podium with name {podium.Name} already exists!")
+
+
+def create_festivals(db: Session, festival: schemas.FestivalCreate):
+    db_festival = models.Festival(name=festival.name)
+    db.add( db_festival)
+    db.commit()
+    db.refresh( db_festival)
+    return  db_festival.id
+
+
+
+
+def get_poduims(db: Session):
+    return db.query(models.Podium).all()
+
+
+
+def create_poduims(db: Session, poduim: schemas.PodiumCreate):
+    db_poduim = models.Podium(name=poduim.name)
+    db.add( db_poduim)
+    db.commit()
+    db.refresh( db_poduim)
+    return  db_poduim.id
+
 
 
 
