@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+</head>
+<body>
+
+
+    <h1>Users</h1>
+    <div x-data="userData()" x-init="fetchUsers">
+        <template x-for="user in users" :key="user.id">
+            <div>
+                <h2 x-text="user.first_name + ' ' + user.last_name"></h2>
+                <ul>
+                    <li x-text="'Email: ' + user.email"></li>
+                </ul>
+            <a href="#" @click="deleteUser(user.id)">Delete User</a>
+            <a :href="`edit-user.html?id=${user.id}`">Edit User</a>
+
+
+            </div>
+        </template>
+    </div>
+
+
+    <!-- Add this somewhere appropriate on the page, e.g., at the top or bottom of the user list -->
+    <a href="/static/users/add_user.html"><button>Add User</button></a>
+
+    <a href="/static/index.html"><button>Home</button></a>
+
+
+    <script>
+    function userData() {
+        return {
+            users: [],
+            fetchUsers() {
+                fetch('/users')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.users = data;
+                    });
+            },
+            deleteUser(userId) {
+                fetch(`/users/${userId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert("User deleted successfully!");
+                        this.fetchUsers();  // Refresh the user list
+                    } else {
+                        return response.json().then(err => {
+                            alert(err.detail);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("There was an error:", error);
+                });
+            }
+        };
+    }
+    </script>
+
+
+</body>
+</html>

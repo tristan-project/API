@@ -1,4 +1,8 @@
 from pydantic import BaseModel
+from enum import Enum
+from uuid import UUID
+from typing import Optional
+
 
 
 class ItemBase(BaseModel):
@@ -9,14 +13,21 @@ class ItemBase(BaseModel):
 class ItemCreate(ItemBase):
     pass
 
+
 class Item(ItemBase):
-    id: int
-    owner_id: int
+    id: UUID
+    owner_id: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+
+
 
 class UserBase(BaseModel):
+    first_name: str
+    last_name: str
     email: str
 
 
@@ -26,69 +37,80 @@ class UserCreate(UserBase):
 
 
 class User(UserBase):
-    id: int
+    id: UUID
     is_active: bool
     items: list[Item] = []
 
-    class Config:
-        orm_mode = True
-#band
+
+
+
+class UserUpdate(BaseModel):  # For updating a user
+    first_name: Optional[str]
+    last_name: Optional[str]
+    email: Optional[str]
+
+
 class BandBase(BaseModel):
-    Name: str
-      
+    name: str  # Changed to lowercase for consistency
+
 
 class BandCreate(BandBase):
     pass
 
-class Band(BandBase):
-    BandID: int
 
-class Config:
-        orm_mode = True
-#podium
+class Band(BandBase):
+    id: UUID  # Changed to snake_case for consistency
+
+
 class PodiumBase(BaseModel):
-    Name: str
-   
+    name: str  # Changed to lowercase for consistency
+
 
 class PodiumCreate(PodiumBase):
     pass
 
+
 class Podium(PodiumBase):
-    PodiumID: int
-class Config:
-        orm_mode = True
-#festival
+    podium_id: str  # Changed to snake_case for consistency
+
+    class Config:
+        from_attributes = True
+
+
 class FestivalBase(BaseModel):
-    Name: str
-    Location: str
-       
+    name: str
+    location: str  # Changed to lowercase for consistency
+
 
 class FestivalCreate(FestivalBase):
     pass
 
+
 class Festival(FestivalBase):
-    FestivalID: int
-    Price: float
-    Year: int
+    festival_id: str  # Changed to snake_case for consistency
+    price: float
+    year: int
 
-class Config:
-        orm_mode = True
-#lineup
-class Lineupbase(BaseModel):
-  Genre:  str    
-       
+    class Config:
+        from_attributes = True
 
-class FestivalCreate(FestivalBase):
+
+class LineupBase(BaseModel):  # Fixed typo in class name
+    genre: str  # Changed to lowercase for consistency
+
+
+class LineupCreate(LineupBase):
     pass
 
-class Festival(FestivalBase):
-    LineupID: int
-    Band_id: int
-    Festival_id: int
-    Podium_id: int
-    owner_id : int
-    Score: float
 
 
-class Config:
-        orm_mode = True
+class Lineup(LineupBase):  # Fixed the class name
+    lineup_id: str  # Changed to snake_case for consistency
+    band_id: str
+    festival_id: str
+    podium_id: str
+    owner_id: str
+    score: float
+
+    class Config:
+        from_attributes = True

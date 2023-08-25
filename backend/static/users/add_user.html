@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+</head>
+<body>
+    <div x-data="userForm()">
+        <form @submit.prevent="addUser">
+            <label for="first_name">First Name:</label>
+            <input type="text" x-model="first_name" placeholder="First Name">
+            
+            <label for="last_name">Last Name:</label>
+            <input type="text" x-model="last_name" placeholder="Last Name">
+
+            <label for="email">Email:</label>
+            <input type="text" x-model="email" placeholder="email">
+
+            <label for="password">Password:</label>
+            <input type="password" x-model="password" placeholder="Password">
+
+            <button type="submit">Add User</button>
+        </form>
+    </div>
+
+    <script>
+        function userForm() {
+            return {
+                email: "",
+                first_name: "",
+                last_name: "",
+                password: "",
+                addUser() {
+                    const userData = {
+                        first_name: this.first_name,
+                        last_name: this.last_name,
+                        email: this.email,
+                        password: this.password
+                    };
+                    
+                    console.log("addUser triggered", userData);
+                    
+                    fetch('/users', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userData)
+                    })
+                    .then(response => {
+                        if(response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to add user.');
+                        }
+                    })
+                    .then(data => {
+                        alert("user added successfully!");
+                        location.href = '/static/users/users.html'; // Redirect to the main page
+                    })
+                    .catch(error => {
+                        alert("Error adding user.");
+                        console.error("There was an error:", error);
+                    });
+                }
+            };
+        }
+    </script>
+</body>
+</html>

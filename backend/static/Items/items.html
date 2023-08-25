@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item List</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+</head>
+<body>
+
+    <h1>Items</h1>
+    <div x-data="itemData()" x-init="fetchItems">
+        <template x-for="item in items" :key="item.id">
+            <div>
+                <h2 x-text="item.title"></h2>
+                <ul>
+                    <li x-text="'Description: ' + (item.description || 'N/A')"></li>
+                    <li x-text="'Owner ID: ' + item.owner_id"></li>
+                </ul>
+                <!-- You can add edit or delete links here similar to users if needed -->
+            </div>
+        </template>
+    </div>
+
+    <!-- Add navigation links as per your need. -->
+    <a href="/static/index.html"><button>Home</button></a>
+
+    <a href="/static/items/create_new_item.html"><button>Create item</button></a>
+
+    <script>
+    function itemData() {
+        return {
+            items: [],
+            fetchItems() {
+                fetch('/items/')
+                    .then(response => response.json())
+                    .then(data => {
+                        this.items = data;
+                    });
+            },
+            // Add other functions like deleteItem, editItem if needed.
+        };
+    }
+    </script>
+
+</body>
+</html>

@@ -1,22 +1,28 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
-import backend.crud as crud
-import backend.models as models
-import backend.schemas   as schemas
-import backend.database as database
+from uuid import UUID, uuid4
+
+
+import crud as crud
+import models as models
+import schemas as schemas
+import database as database
 import os
+from fastapi.staticfiles import StaticFiles
 
 from fastapi.middleware.cors import CORSMiddleware
-
 
 if not os.path.exists('.\sqlitedb'):
     os.makedirs('.\sqlitedb')
 
-#"sqlite:///./sqlitedb/sqlitedata.db"
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
+
+
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 origins = [
     "http://localhost",
@@ -41,31 +47,60 @@ def get_db():
     finally:
         db.close()
 
+# @app.post("/users/", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
+# def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+#     #db_user = crud.get_user_by_email(db, email=user.email)
+#     ##   raise HTTPException(status_code=400, detail="Email already registered")
+#     return crud.create_user(db=db, user=user)
+
+@app.post("/users", response_model=schemas.User)  # Use the schema for response
+async def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    print("Received user data:", user)  # <-- Add this print statement
+
+    return crud.create_user(db, user)
 
 
-@app.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db=db, user=user)
-
-
-@app.get("/users/", response_model=list[schemas.User])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    users = crud.get_users(db, skip=skip, limit=limit)
+@app.get("/users", response_model=list[schemas.User])
+def read_users(db: Session = Depends(get_db)):
+    users = crud.get_users(db)
     return users
 
 
 @app.get("/users/{user_id}", response_model=schemas.User)
-def read_user(user_id: int, db: Session = Depends(get_db)):
+def read_user(user_id: str, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
 
-@app.post("/users/{user_id}/items/", response_model=schemas.Item)
+@app.delete("/users/{user_id}")
+async def remove_user(user_id: str, db: Session = Depends(get_db)):  # Use UUID
+    success = crud.delete_user(db, user_id)
+    if not success:
+        raise HTTPException(
+            status_code=404,
+            detail=f"user with id: {user_id} does not exist"
+        )
+    return {"status": "User deleted"}
+
+
+
+@app.put("/users/{user_id}")
+async def update_existing_user(user_id: str, user_update: schemas.UserUpdate, db: Session = Depends(get_db)):
+    updated_data = user_update.dict(exclude_unset=True)
+    updated_user = crud.update_user(db, user_id, updated_data)
+    if not updated_user:
+        raise HTTPException(
+            status_code=404,
+            detail=f"user with id: {user_id} does not exist"
+        )
+    return updated_user
+
+
+
+
+@app.post("/users/{user_id}/items/", response_model=schemas.Item, status_code=status.HTTP_201_CREATED)
 def create_item_for_user(
     user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
 ):
@@ -73,17 +108,23 @@ def create_item_for_user(
 
 
 @app.get("/items/", response_model=list[schemas.Item])
-def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    items = crud.get_items(db, skip=skip, limit=limit)
+def read_items(db: Session = Depends(get_db)):
+    items = crud.get_items(db)
     return items
 
 
-@app.post("/api/band/", response_model=schemas.Band)
+@app.get("/bands", response_model=list[schemas.Band])
+def read_bands(db: Session = Depends(get_db)):
+    bands = crud.get_bands(db)
+    return bands
+
+
+@app.post("/bands", response_model=schemas.Band, status_code=status.HTTP_201_CREATED)
 def create_band_endpoint(band: schemas.BandCreate, db: Session = Depends(get_db)):
     band_id = crud.create_band(db, band)
-    return {"BandID": band_id, **band.dict()}
+    return {"id": band_id, "name": band.name}
 
-@app.post("/api/festival/", response_model=schemas.Festival)
+@app.post("/festivals/", response_model=schemas.Festival, status_code=status.HTTP_201_CREATED)
 def create_festival_endpoint(festival: schemas.FestivalCreate, db: Session = Depends(get_db)):
     festival_id = crud.create_festival(db, festival)
     return {"FestivalID": festival_id, **festival.dict()}

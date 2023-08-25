@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Band</title>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+</head>
+<body>
+
+<h1>Add a Band</h1>
+
+<div x-data="bandData()">
+    <label for="name">Band Name:</label><br>
+    <input x-model="band.name" type="text" id="name" required><br><br>
+    <button @click="createBand">Add Band</button>
+</div>
+
+<script>
+function bandData() {
+    return {
+        band: {
+            name: ''
+        },
+        createBand() {
+            fetch('/bands/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.band),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Band created successfully with ID: ' + data.id);
+                location.href = '/static/band/band.html'; // Redirect to the main page
+
+            })
+            .catch(error => {
+                console.error("There was an error:", error);
+                alert("Failed to create the band.");
+            });
+        }
+    };
+}
+</script>
+
+</body>
+</html>
